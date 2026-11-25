@@ -12,14 +12,14 @@ model = GoogleModel(os.environ["LLM_MODEL"], provider=provider)
 
 
 class Answer(BaseModel):
-    definition: str = Field(description="A one-sentence definition")
+    definition: str = Field(description="A one-sentence definition", max_length=80)
     example: str = Field(description="A short concrete example of it in use")
-    keywords: list[str] = Field(description="Exactly three keywords related to the topic")
+    keywords: list[str] = Field(description="Exactly three keywords related to the topic", min_length=3, max_length=3)
 
 
 agent = Agent(model, output_type=Answer)
 
-result = agent.run_sync("In one sentence, what is a tool call in an LLM API?")
+result = agent.run_sync(input("Query: "))
 
 answer = result.output
 
@@ -27,10 +27,11 @@ print(answer.definition)
 print()
 print("Example:", answer.example)
 print("Keywords:", ", ".join(answer.keywords))
-
-import os
+print("model requests:", result.usage.requests)
+print("model tokens:", result.usage.total_tokens)
 
 if os.environ.get("DEBUG") == "1":
     for message in result.all_messages():
         print(message)
         print("---")
+
